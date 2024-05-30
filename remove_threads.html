@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remove Threads</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            padding-top: 60px;
+        }
+        .container {
+            max-width: 800px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">My Forum</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="profile.html">Profile</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="forum.html">Forum</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="remove_threads.html">Remove Threads</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="login.html">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Remove Threads</h2>
+        <div id="threads"></div>
+        <a href="forum.html" class="btn btn-primary">Create Forum</a>
+    </div>
+
+    <script>
+        function loadThreads() {
+            fetch('get_threads.php')
+            .then(response => response.json())
+            .then(data => {
+                const threadsDiv = document.getElementById('threads');
+                threadsDiv.innerHTML = '';
+
+                data.threads.forEach((thread, index) => {
+                    const threadElement = document.createElement('div');
+                    threadElement.className = 'card mb-3';
+                    threadElement.innerHTML = `
+                        <div class="card-body">
+                            <h5 class="card-title">${thread.title}</h5>
+                            <p class="card-text">${thread.content}</p>
+                            <p class="card-text"><small class="text-muted">${thread.created_at}</small></p>
+                            <button class="btn btn-danger" onclick="removeThread(${index})">Remove</button>
+                        </div>
+                    `;
+                    threadsDiv.appendChild(threadElement);
+                });
+            });
+        }
+
+        function removeThread(index) {
+            fetch('remove_thread.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ index })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadThreads();
+                } else {
+                    alert('Error removing thread');
+                }
+            });
+        }
+
+        window.onload = loadThreads;
+    </script>
+</body>
+</html>
